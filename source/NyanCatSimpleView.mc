@@ -6,15 +6,19 @@ using Toybox.Time.Gregorian;
 
 class NyanCatSimpleView extends WatchUi.WatchFace {
 
-	const NYAN_BG = 0x000055;
+	// Color constants for text and bg stuff.
+	const NYAN_BG     = 0x000055;
 	const NYAN_FG_TXT = 0xFFFFFF;
 	const NYAN_ACCENT = 0xFFAAFF;
 	
-	const BATTERY_HAPPY = 0x00FF00;
-	const BATTERY_MEH = 0xFFAA00;
-	const BATTERY_SAD = 0xFF0000;
-	const BATTERY_WIDTH = 30;
-	const BATTERY_HEIGHT = 8;
+	// Battery constants.
+	const BATTERY_HAPPY  = 0x00FF00;
+	const BATTERY_MEH    = 0xFFAA00;
+	const BATTERY_SAD    = 0xFF0000;
+	const BATTERY_WIDTH  = 30;
+	const BATTERY_HEIGHT = 10;
+	const BATTERY_NUB_H  = 4;
+	const BATTERY_NUB_W  = 2;
 
 	var nyanCatBitmap;
 
@@ -63,26 +67,39 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
         
         dc.setColor(NYAN_FG_TXT, Graphics.COLOR_TRANSPARENT);
         dc.drawText(dc.getWidth() / 2, datePosY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-    
-    	// TODO - Accent the minutes. How to do this?
-    
+        
         // Get and show the current time. Adjust based off of 12/24 hour format.
         var clockTime = System.getClockTime();
         var hour = clockTime.hour;
+        var minute = clockTime.min.format("%02d");
         
         if(hour > 12 && !deviceSettings.is24Hour){
         	hour -= 12;
         }
         
-        var timeString = Lang.format("$1$:$2$", [hour, clockTime.min.format("%02d")]);
 		var timePosY = dc.getHeight() / 2 + 30;
+        
+        // Compute full size of text to know how to position this.
+        // The padding on each side of this full text will be (dc.getWidth - fullTimeWidth) / 2.
+        var fullTimeString = Lang.format("$1$:$2$", [hour, minute]);
+		var fullTimeWidth = dc.getTextWidthInPixels(fullTimeString, Graphics.FONT_NUMBER_THAI_HOT);
+		var timeStartPosX = (dc.getWidth() - fullTimeWidth) / 2;
+				
+		// Draw hour and colon part. Save size to know how to offset the minutes.
+		var hourString = Lang.format("$1$:", [hour]);
+		var hourTimeSize = dc.getTextWidthInPixels(hourString, Graphics.FONT_NUMBER_THAI_HOT);
 		
 		dc.setColor(NYAN_FG_TXT, Graphics.COLOR_TRANSPARENT);
-		dc.drawText(dc.getWidth() / 2, timePosY, Graphics.FONT_NUMBER_THAI_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-				
+		dc.drawText(timeStartPosX, timePosY, Graphics.FONT_NUMBER_THAI_HOT, hourString, Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
+		
+		// Darw the minutes from the last pixel from the hour & color string.
+		var minuteString = Lang.format("$1$", [minute]);
+		dc.setColor(NYAN_ACCENT, Graphics.COLOR_TRANSPARENT);
+		dc.drawText((timeStartPosX + hourTimeSize), timePosY, Graphics.FONT_NUMBER_THAI_HOT, minuteString, Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
+		
 		// Battery graphic. Set to lower 1/8 of screen.
 		var batteryY = (dc.getHeight() / 8 * 7) - (BATTERY_HEIGHT / 2);
-		var batteryX = dc.getWidth() / 2 - (BATTERY_WIDTH / 2);
+		var batteryX = (dc.getWidth() / 2) - (BATTERY_WIDTH / 2);
 				
 		// Battery color is based off of percent as well. Based off of Nyan image.
 		var batteryColor = BATTERY_HAPPY;
@@ -100,6 +117,11 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
 		// Draw rectangle border
 		dc.setColor(NYAN_FG_TXT, NYAN_BG);
 		dc.drawRectangle(batteryX, batteryY, BATTERY_WIDTH, BATTERY_HEIGHT);
+		
+		// Draw a little battery positive terminal nub.
+		// The Y position of this will be the middle of the battery less half of the height of the nub.
+		var batteryNubY = batteryY + (BATTERY_HEIGHT / 2) - (BATTERY_NUB_H / 2);
+		dc.fillRectangle(batteryX + BATTERY_WIDTH, batteryNubY, BATTERY_NUB_W, BATTERY_NUB_H);
     }
 
 	//function onPartialUpdate(dc) {
