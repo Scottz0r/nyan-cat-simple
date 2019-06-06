@@ -34,6 +34,8 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
         //0x5500FF	// Violet
     ];
 
+    const FORCE_REDRAW = -1; // Set prevMinute to this to force redraw.
+
     var prevMinute; // Tracks the last minute to prevent spam in high power mode.
 
     var nyanCatBitmap; // Nyan cat image.
@@ -41,7 +43,7 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
     function initialize() {
         WatchFace.initialize();
 
-        prevMinute = 0;
+        prevMinute = FORCE_REDRAW;
     }
 
     function onLayout(dc) {
@@ -60,6 +62,7 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
     // the state of this View and prepare it to be shown. This includes
     // loading resources into memory.
     function onShow() {
+        prevMinute = FORCE_REDRAW;
     }
 
     // Update the view
