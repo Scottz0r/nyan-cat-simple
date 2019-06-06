@@ -9,7 +9,6 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
 	// Color constants for text and bg stuff.
 	const NYAN_BG     = 0x000055;
 	const NYAN_FG_TXT = 0xFFFFFF;
-	const NYAN_ACCENT = 0xFFAAFF;
 	
 	// Battery constants.
 	const BATTERY_HAPPY  = 0x00FF00;
@@ -19,6 +18,16 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
 	const BATTERY_HEIGHT = 10;
 	const BATTERY_NUB_H  = 4;
 	const BATTERY_NUB_W  = 2;
+
+	// Colors for RNG accent (from rainbow)
+	const accentArray = [
+		0xFF0000,	// Red
+		0xFFAA00,	// Orange
+		0xFFFF00,	// Yellow
+		0x00FF00,	// Green
+		0x55AAFF,	// Light Blue
+		0x5500FF	// Violet
+	];
 
 	var nyanCatBitmap;
 
@@ -47,13 +56,12 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
     // Update the view
     function onUpdate(dc) {
     	var deviceSettings = System.getDeviceSettings();
-    	var systemStatus = System.getSystemStats();
     
     	// Draw background.
-    	dc.setColor(NYAN_BG, Graphics.COLOR_TRANSPARENT);
-    	dc.fillRectangle(0, 0, dc.getWidth(), dc.getHeight());
+    	dc.setColor(NYAN_BG, NYAN_BG);
+    	dc.clear();
     
-    	// TODO - for debugging: Draw some alignment lines.
+    	// DEBUGGING - for debugging: Draw some alignment lines.
     	//dc.setColor(0xFFFF55, Graphics.COLOR_TRANSPARENT);
     	//dc.drawRectangle(dc.getWidth() / 2, 0, 1, dc.getHeight());
     
@@ -92,11 +100,19 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
 		dc.setColor(NYAN_FG_TXT, Graphics.COLOR_TRANSPARENT);
 		dc.drawText(timeStartPosX, timePosY, Graphics.FONT_NUMBER_THAI_HOT, hourString, Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
 		
-		// Darw the minutes from the last pixel from the hour & color string.
-		var minuteString = Lang.format("$1$", [minute]);
-		dc.setColor(NYAN_ACCENT, Graphics.COLOR_TRANSPARENT);
+		// Darw the minutes from the last pixel from the hour & color string. Use random accent color.
+		var accentColor = getRngAccent();
+		var minuteString = minute.toString();//Lang.format("$1$", [minute]);
+		dc.setColor(accentColor, Graphics.COLOR_TRANSPARENT);
 		dc.drawText((timeStartPosX + hourTimeSize), timePosY, Graphics.FONT_NUMBER_THAI_HOT, minuteString, Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-		
+	
+		drawBattery(dc);
+    }
+
+	// Draw a battery graphic in the bottom 1/8th of the screen.
+	function drawBattery(dc) {
+    	var systemStatus = System.getSystemStats();
+	
 		// Battery graphic. Set to lower 1/8 of screen.
 		var batteryY = (dc.getHeight() / 8 * 7) - (BATTERY_HEIGHT / 2);
 		var batteryX = (dc.getWidth() / 2) - (BATTERY_WIDTH / 2);
@@ -122,7 +138,14 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
 		// The Y position of this will be the middle of the battery less half of the height of the nub.
 		var batteryNubY = batteryY + (BATTERY_HEIGHT / 2) - (BATTERY_NUB_H / 2);
 		dc.fillRectangle(batteryX + BATTERY_WIDTH, batteryNubY, BATTERY_NUB_W, BATTERY_NUB_H);
-    }
+	}
+
+	// Get a RNG accent color.
+	function getRngAccent() {
+		var rng = Math.rand();
+		var i = rng % accentArray.size();		
+		return accentArray[i];
+	}
 
 	//function onPartialUpdate(dc) {
 	//}
@@ -130,15 +153,15 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
     // memory.
-    function onHide() {
-    }
+    //function onHide() {
+    //}
 
     // The user has just looked at their watch. Timers and animations may be started here.
-    function onExitSleep() {
-    }
+    //function onExitSleep() {
+    //}
 
     // Terminate any active timers and prepare for slow updates.
-    function onEnterSleep() {
-    }
+    //function onEnterSleep() {
+    //}
 
 }
