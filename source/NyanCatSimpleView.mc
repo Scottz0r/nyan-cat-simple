@@ -34,7 +34,10 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
         //0x5500FF	// Violet
     ];
 
-    const FORCE_REDRAW = -1; // Set prevMinute to this to force redraw.
+    // Set prevMinute to this to force redraw. This is used to find a difference to
+    // the prior minute to avoid high-power mode onUpdate() spam. Making this 0 will
+    // break the WatchFace when showing/switch during the first minute of the hour.
+    const FORCE_REDRAW = -1;
 
     var prevMinute; // Tracks the last minute to prevent spam in high power mode.
 
