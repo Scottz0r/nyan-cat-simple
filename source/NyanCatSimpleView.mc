@@ -116,8 +116,13 @@ class NyanCatSimpleView extends WatchUi.WatchFace {
         var hour = clockTime.hour;
         var minute = clockTime.min.format("%02d");
 
-        if(hour > 12 && !deviceSettings.is24Hour){
-            hour -= 12;
+        if(!deviceSettings.is24Hour){
+            if(hour > 12){
+                hour -= 12;
+            }
+            else if(hour == 0){
+                hour = 12;
+            }
         }
 
         var timePosY = dc.getHeight() / 2 + 30;
